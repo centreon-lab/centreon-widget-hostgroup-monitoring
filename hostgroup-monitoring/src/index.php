@@ -154,4 +154,3 @@ $template->assign('serviceStateLabels', $serviceStateLabels);
 $template->assign('serviceStateColors', $serviceStateColors);
 $template->assign('data', $data);
 $template->display('table.ihtml');
-?>
