@@ -66,7 +66,7 @@ $widgetId = $_REQUEST['widgetId'];
 
 $dbb = new CentreonDB("centstorage");
 $widgetObj = new CentreonWidget($centreon, $db);
-$sgMonObj = new HostgroupMonitoring($dbb);
+$hgMonObj = new HostgroupMonitoring($dbb);
 $preferences = $widgetObj->getWidgetPreferences($widgetId);
 $pearDB = $db;
 $aclObj = new CentreonACL($centreon->user->user_id, $centreon->user->admin);
@@ -150,16 +150,17 @@ $detailMode = false;
 if (isset($preferences['enable_detailed_mode']) && $preferences['enable_detailed_mode']) {
     $detailMode = true;
 }
+
 while ($row = $res->fetchRow()) {
-    $hostgroup = array(
-        'host_state' => $sgMonObj->getHostStates($row['name'], $detailMode, $centreon->user->admin, $aclObj, $preferences),
-        'service_state' => $sgMonObj->getServiceStates($row['name'], $detailMode, $centreon->user->admin, $aclObj, $preferences)
-    );
-    foreach ($row as $key => $value) {
-        $hostgroup[$key] = $value;
-    }
-    $data[] = $hostgroup;
+    $data[$row['name']] = array('name'          => $row['name'],
+        'hg_id'         => $row['hostgroup_id'],
+        'hgurl'         => "main.php?p=20201&o=svc&hg=" .$row['hostgroup_id'],
+        "hgurlhost"     => "main.php?p=20202&o=h&hostgroups=" . $row['hostgroup_id'],
+        'host_state'    => array(),
+        'service_state' => array());
 }
+$hgMonObj->getHostStates($data, $detailMode, $centreon->user->admin, $aclObj, $preferences);
+$hgMonObj->getServiceStates($data, $detailMode, $centreon->user->admin, $aclObj, $preferences);
 
 $template->assign('preferences', $preferences);
 $template->assign('hostStateLabels', $hostStateLabels);
